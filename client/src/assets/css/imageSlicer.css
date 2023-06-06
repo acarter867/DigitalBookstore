@@ -1,0 +1,30 @@
+.image-container {
+    position: relative;
+  }
+  
+  .image {
+    display: block;
+  }
+  
+  .image-container.loaded {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .vertical-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px; /* Increase the width to make the line more visible */
+    background-color: rgba(255, 0, 0, 0.5); /* Change the color to suit your needs */
+    transform: translateX(-50%);
+  }
+  .slider-container{
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  

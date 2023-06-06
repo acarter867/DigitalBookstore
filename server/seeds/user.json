@@ -1,0 +1,20 @@
+[
+   {
+    "id": 1,
+    "first_name": "Heidi",
+    "last_name": "Carter",
+    "username": "gabagool",
+    "password": "gabagool",
+    "email": "heidisarray@gmail.com",
+    "is_admin": true
+   },
+   {
+    "id": 2,
+    "first_name": "Alec",
+    "last_name": "Carter",
+    "username": "Doofus",
+    "password": "Doofus",
+    "email": "acarter867@icloud.com",
+    "is_admin": true
+   }
+]
