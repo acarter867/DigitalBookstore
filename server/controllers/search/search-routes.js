@@ -40,7 +40,6 @@ router.get('/book/category/:category_id', async(req, res) => {
             }
         });
 
-
         if(!bookData){
             res.status(404).json({
                 message: "Category Not Found"

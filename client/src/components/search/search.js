@@ -27,13 +27,10 @@ export default function Search() {
           const bookItems = [];
           for (const element of data) {
             const currId = element.id;
-            const frontThumbnailResponse = await fetch(`/api/search/thumbnail/${element.front_thumbnail}`);
-            const backThumbnailResponse = await fetch(`/api/search/thumbnail/${element.back_thumbnail}`);
-            console.log(frontThumbnailResponse)
             const bookDisplay = {
               bookData: element,
-              frontThumbnail: frontThumbnailResponse.url,
-              backThumbnail: backThumbnailResponse.url,
+              frontThumbnail: element.front_thumbnail,
+              backThumbnail: element.back_thumbnail,
             };
             bookItems.push(bookDisplay);
           }

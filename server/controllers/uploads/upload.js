@@ -15,7 +15,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET 
 });
 
-//send new book PDF/ZIP TO S3
+//send new book PDF/ZIP TO Cloudinary
 router.post('/book/file', upload.single('file'), async (req, res) => {
   try {
     const fileBuffer = req.file.buffer;
@@ -131,7 +131,6 @@ router.post('/book/productimages', upload.array('productimages'), async (req, re
           }
         }).end(productImage.buffer);
       });
-
       promises.push(promise);
     });
 
