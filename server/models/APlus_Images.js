@@ -1,15 +1,15 @@
-const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../config/connection");
+const {Model, DataTypes} = require("sequelize")
 
-class Prod_Images extends Model{}
+class APlus_Images extends Model{}
 
-Prod_Images.init(
+APlus_Images.init(
     {
         id: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            autoIncrement: true,
-            primaryKey: true
+            primaryKey: true,
+            autoIncrement: true
         },
         product_id: {
             type: DataTypes.STRING,
@@ -21,9 +21,9 @@ Prod_Images.init(
         },
         name: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
         },
-        url:{
+        url: {
             type: DataTypes.STRING,
             allowNull: false
         }
@@ -33,8 +33,8 @@ Prod_Images.init(
         timestamps: false,
         freezeTableName: true,
         underscored: true,
-        modelName: "prod_images"
+        modelName: "a_plus_images",
     }
 );
 
-module.exports = Prod_Images;
+module.exports = APlus_Images;

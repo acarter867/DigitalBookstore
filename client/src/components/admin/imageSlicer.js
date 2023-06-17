@@ -7,6 +7,8 @@ const ImageSlicer = ({ imageUrl, onSplit }) => {
   const imageRef = useRef(null);
   const [leftImageSrc, setLeftImageSrc] = useState('');
   const [rightImageSrc, setRightImageSrc] = useState('');
+  const [imageHasSplit, setImageHasSplit] = useState(false)
+  const [confirm, setConfirm] = useState(false)
 
   useEffect(() => {
     if (imageRef.current && imageRef.current.complete) {
@@ -24,15 +26,16 @@ const ImageSlicer = ({ imageUrl, onSplit }) => {
 
   const handleSplitImage = (e) => {
     e.preventDefault();
+    setImageHasSplit(true)
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
-  
+
     const image = imageRef.current;
     canvas.width = image.width;
     canvas.height = image.height;
-  
+
     context.drawImage(image, 0, 0);
-  
+
     const leftImage = context.getImageData(
       0,
       0,
@@ -45,64 +48,79 @@ const ImageSlicer = ({ imageUrl, onSplit }) => {
       image.width / 2 - lineWidth / 2,
       image.height
     );
-  
+
     canvas.width = image.width / 2 - lineWidth / 2;
     context.putImageData(leftImage, 0, 0);
     const leftImageDataURL = canvas.toDataURL('image/png');
     setLeftImageSrc(leftImageDataURL);
-  
+
     canvas.width = image.width / 2 - lineWidth / 2;
     context.clearRect(0, 0, image.width / 2 - lineWidth / 2, image.height);
     context.putImageData(rightImage, 0, 0);
     const rightImageDataURL = canvas.toDataURL('image/png');
     setRightImageSrc(rightImageDataURL);
-    onSplit(leftImageDataURL, rightImageDataURL);
+    onSplit(rightImageDataURL, leftImageDataURL);
   };
+
+  const confirmSplitImage = () => {
+    setConfirm(true)
+  }
 
   return (
     <div className="image-slicer">
-      <div className={`image-container ${imageLoaded ? 'loaded' : ''}`}>
-        <img
-          className="image"
-          src={imageUrl}
-          alt="Image"
-          ref={imageRef}
-          onLoad={() => setImageLoaded(true)}
-        />
-        {imageLoaded && (
-          <div
-            className="vertical-line"
-            style={{
-              left: `calc(50% - ${lineWidth}px)`,
-              right: `calc(50% - ${lineWidth}px)`,
-            }}
+      {!confirm && <div>
+        <div className={`image-container ${imageLoaded ? 'loaded' : ''}`}>
+          <img
+            className="image"
+            src={imageUrl}
+            alt="Image"
+            ref={imageRef}
+            onLoad={() => setImageLoaded(true)}
           />
+          {imageLoaded && (
+            <div
+              className="vertical-line"
+              style={{
+                left: `calc(50% - ${lineWidth}px)`,
+                right: `calc(50% - ${lineWidth}px)`,
+              }}
+            />
+          )}
+        </div>
+        <div className="slider-container">
+          <input
+            type="range"
+            min="0"
+            max="10"
+            step="0.1"
+            value={imageRef.current ? (lineWidth / (imageRef.current.width / 2)) * 100 : 0}
+            onChange={handleSliderChange}
+            className="line-slider"
+          />
+          <button onClick={handleSplitImage}>Split Image</button>
+          {imageHasSplit &&
+            <div>
+              <button onClick={confirmSplitImage}>Looks Good!</button>
+            </div>
+          }
+        </div>
+      </div>}
+
+      <div className='sliced-images'>
+        {leftImageSrc && (
+          <div>
+            <h3>Left Image:</h3>
+            <img src={rightImageSrc} alt="Left" />
+          </div>
+        )}
+        {rightImageSrc && (
+          <div>
+            <h3>Right Image:</h3>
+            <img src={leftImageSrc} alt="Right" />
+          </div>
         )}
       </div>
-      <div className="slider-container">
-        <input
-          type="range"
-          min="0"
-          max="10"
-          step="0.1"
-          value={imageRef.current ? (lineWidth / (imageRef.current.width / 2)) * 100 : 0}
-          onChange={handleSliderChange}
-          className="line-slider"
-        />
-        <button onClick={handleSplitImage}>Split Image</button>
-      </div>
-      {leftImageSrc && (
-        <div>
-          <h3>Left Image:</h3>
-          <img src={leftImageSrc} alt="Left" />
-        </div>
-      )}
-      {rightImageSrc && (
-        <div>
-          <h3>Right Image:</h3>
-          <img src={rightImageSrc} alt="Right" />
-        </div>
-      )}
+
     </div>
   );
 };

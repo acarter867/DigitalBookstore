@@ -1,17 +1,15 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ImageSlicer from './imageSlicer';
 import { Document, Page, pdfjs } from 'react-pdf';
 import '../../assets/css/uploadForm.css';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
-export default function PdfUpload(){
+export default function PdfUpload() {
+    const fileInputRef = useRef(null)
     const [firstPageUrl, setFirstPageUrl] = useState(null);
     const [lastPageUrl, setLastPageUrl] = useState(null);
     const [fileExt, setFileExt] = useState("")
-    const [productImages, setProductImages] = useState([]);
-    const [firstThumbnail, setFirstThumbnail] = useState(null);
-    const [secondThumbnail, setSecondThumbnail] = useState(null);
     const [coverUrl, setCoverUrl] = useState(null)
     const [selectedCover, setSelectedCover] = useState(null);
     const [selectedFile, setSelectedFile] = useState(null);
@@ -23,9 +21,14 @@ export default function PdfUpload(){
     const [brandId, setBrandId] = useState("");
     const [categories, setCategories] = useState([]);
     const [categoryId, setCategoryId] = useState("");
-    const [isZip, setIsZip] = useState(false);  
-    
-    useEffect(() => {    
+    const [isZip, setIsZip] = useState(false);
+    const [subtitle, setSubtitle] = useState("");
+    const [displayTitle, setDisplayTitle] = useState("");
+    const [prodImagesLoaded, setProdImagesLoaded] = useState(false);
+    const [step, setStep] = useState(1)
+    const [aPlusPics, setAPlusPics] = useState([])
+
+    useEffect(() => {
         fetchCategoryData();
         fetchBrandData()
     }, []);
@@ -33,7 +36,7 @@ export default function PdfUpload(){
     //Get list of all categories for dropdown selection
     async function fetchCategoryData() {
         try {
-            const response = await fetch('/api/upload/category'); 
+            const response = await fetch('/api/upload/category');
             const data = await response.json();
             setCategories(data);
             console.log(data)
@@ -45,7 +48,7 @@ export default function PdfUpload(){
     //Get List of all brands for dropdown selection
     async function fetchBrandData() {
         try {
-            const response = await fetch('/api/upload/brand'); 
+            const response = await fetch('/api/upload/brand');
             const data = await response.json();
             setBrands(data);
             console.log(data)
@@ -54,8 +57,8 @@ export default function PdfUpload(){
         }
     }
 
-        //Generate 20% of pdf into images for "look inside" feature
-    const generateProductPics = async(file) => {
+    //Generate 20% of pdf into images for "look inside" feature
+    const generateProductPics = async (file) => {
         const imageUrls = []
         const reader = new FileReader();
         reader.readAsArrayBuffer(file);
@@ -64,9 +67,9 @@ export default function PdfUpload(){
         const totalPages = pdf.numPages;
         const twentyPercent = Math.floor(totalPages * .2);
         console.log(twentyPercent)
-        for(let i = 2; i <= twentyPercent; i++){
+        for (let i = 2; i <= twentyPercent; i++) {
             const currPage = await pdf.getPage(i);
-            const currViewport = currPage.getViewport({scale: .5});
+            const currViewport = currPage.getViewport({ scale: .5 });
             const currCanvas = document.createElement("canvas");
             const currContext = currCanvas.getContext("2d");
             currCanvas.height = currViewport.height;
@@ -75,9 +78,10 @@ export default function PdfUpload(){
             const currPageUrl = currCanvas.toDataURL();
             imageUrls.push(currPageUrl);
         }
+        setProdImagesLoaded(true)
         return imageUrls;
     }
-        //convert cover page to png for splitting
+    //convert cover page to png for splitting
     const fetchPdfThumbnail = async (file) => {
         setPdfProdImages([]);
         const reader = new FileReader();
@@ -97,14 +101,14 @@ export default function PdfUpload(){
     };
     // Generate Blob data for images.
     function generateBlobData(imageUrl) {
-        try{
+        try {
             const binaryData = atob(imageUrl.split(',')[1]);
             const array = [];
-            for(let i = 0; i < binaryData.length; i++) {
+            for (let i = 0; i < binaryData.length; i++) {
                 array.push(binaryData.charCodeAt(i));
             }
-            return new Blob([new Uint8Array(array)], {type: 'image/png'});
-        }catch{
+            return new Blob([new Uint8Array(array)], { type: 'image/png' });
+        } catch {
             console.log("nothing to split")
         }
     }
@@ -121,12 +125,13 @@ export default function PdfUpload(){
 
     //Create new png image files from product picture blob data -> 
     //push all prod images to single array for server upload.
-    const bundleProductImages = async() => {
+    const bundleProductImages = async () => {
         const processedImages = [];
-        for(let i = 0; i < pdfProdImages.length; i++){
+        for (let i = 0; i < pdfProdImages.length; i++) {
             const newImage = new File([generateBlobData(pdfProdImages[i])], `${title}-${type}-${i}`, { type: "image/png" });
             processedImages.push(newImage);
         }
+        console.log(processedImages)
         return processedImages;
     }
 
@@ -134,7 +139,7 @@ export default function PdfUpload(){
         e.preventDefault();
         //bundle thumbnails and product pictures to array
         const thumbnails = bundleThumbnails();
-        const processedProductImages = bundleProductImages();
+        const processedProductImages = await bundleProductImages();
 
         //Create form data for thumbnails
         const thumbnailData = new FormData();
@@ -142,32 +147,30 @@ export default function PdfUpload(){
             thumbnailData.append("thumbnails", thumbnail);
         });
 
-        //Create form dat a for productPics
+        //Create form data for productPics
         const productPicData = new FormData();
-        processedProductImages.forEach(image => {
-            productPicData.append("productimages", image);
-        });       
+        console.log(processedProductImages)
 
-        try{
-            const formData = new FormData();   
+        try {
+            const formData = new FormData();
             //Rename file to standardized format
-            const newFile = new File([selectedFile], `${title}-${type}`, {type: selectedFile.type})
-            if(title && brandId && categoryId && description && type && newFile){
+            const newFile = new File([selectedFile], `${title}-${type}`, { type: selectedFile.type })
+            if (title && brandId && categoryId && description && type && newFile) {
                 formData.append('file', newFile);
                 const response = await fetch('/api/upload/book/file', {
                     method: 'POST',
                     body: formData,
                 });
-                if(response.ok){
+                if (response.ok) {
                     console.log("File upload success")
                 }
-                
+
                 //send thumbnails to cloudinary & database
                 const thumbnailResponse = await fetch('/api/upload/book/thumbnails', {
                     method: 'POST',
                     body: thumbnailData,
                 });
-                if(thumbnailResponse.ok){
+                if (thumbnailResponse.ok) {
                     const responseJSON = await thumbnailResponse.json()
                     const imageUrls = responseJSON.imageUrls;
                     console.log("thubmnail response is good");
@@ -175,6 +178,8 @@ export default function PdfUpload(){
                     //use image urls to send to cloudinary
                     const body = {
                         title: `${title}-${type}`,
+                        display_title: displayTitle,
+                        subtitle: subtitle,
                         brand_id: brandId,
                         category_id: categoryId,
                         description: description,
@@ -188,72 +193,93 @@ export default function PdfUpload(){
                         body: JSON.stringify(body),
                         headers: { "Content-Type": "application/json" },
                     });
-                    if(dataResponse.ok){
+                    if (dataResponse.ok) {
                         const responseData = await dataResponse.json();
                         const book_id = responseData.id;
-                        processedProductImages.forEach((image, index) => {
-                            const imageBody = {
-                                product_id: book_id,
-                                name: image.name,
-                                alt_text: `product-preview-${index}`
-                            }
-                            const prodImgData = fetch('/api/upload/book/productimg/data', {
-                                method: 'POST',
-                                body: JSON.stringify(imageBody),
-                                headers: { "Content-Type": "application/json" },
-                            })
-                            if(prodImgData.ok){
-                                console.log("product pictures response good")
-                            }
-                        })
-                    }
-                }
 
-                //send product images to cloudinary
-                const prodImageResponse = await fetch('/api/upload/book/productimages', {
-                    method: 'POST',
-                    body: productPicData
-                })
-                if(prodImageResponse.ok){
-                    console.log("response good")
+                        //Send product image data to cloudinary
+                        for (const image of processedProductImages) {
+                            console.log(image)
+                            try {
+                                const imageFormData = new FormData();
+                                imageFormData.append('productimage', image)
+                                const imageUploadResponse = await fetch('/api/upload/book/productimage', {
+                                    method: "POST",
+                                    body: imageFormData
+                                });
+                                if (imageUploadResponse.ok) {
+                                    const imageUploadResponseData = await imageUploadResponse.json();
+                                    const prodImageUrl = imageUploadResponseData.imageUrl;
+                                    console.log(prodImageUrl)
+                                    const imageBody = {
+                                        product_id: book_id,
+                                        name: image.name,
+                                        alt_text: `product-preview`,
+                                        url: prodImageUrl
+                                    }
+                                    console.log(imageBody)
+                                    const prodImgData = await fetch('/api/upload/book/productimg/data', {
+                                        method: 'POST',
+                                        body: JSON.stringify(imageBody),
+                                        headers: { "Content-Type": "application/json" },
+                                    })
+                                    if (prodImgData.ok) {
+                                        console.log("product pictures response good")
+                                    }
+                                }
+                            } catch (error) {
+                                // Handle the error if the image upload fails
+                                console.log(error)
+                            }
+                        }
+                    }
                 }
                 console.log("FILE UPLOADED")
                 setSelectedFile(null);
-            }else{
-            console.log("SOMETHING IS NULL")
-        }}catch{
+            } else {
+                console.log("SOMETHING IS NULL")
+            }
+        } catch {
             console.log("something went wrong")
         }
-      }
+    }
 
-      function handleCategoryChange(e) {
+    function handleCategoryChange(e) {
         setCategoryId(e.target.value);
-      }
+    }
 
-      function handleBrandChange(e) {
+    function handleBrandChange(e) {
         setBrandId(e.target.value);
-      }
+    }
 
-      function handleDescriptionChange(e){
-        setDescription(e.target.value)
-      }
+    function handleDescriptionChange(e) {
+        setDescription(e.target.value);
+    }
 
-      function handleTitleChange(e){
-        setTitle(e.target.value)
-      }
+    function handleTitleChange(e) {
+        setTitle(e.target.value);
+    }
 
-      function handleTypeChange(e){
-        setType(e.target.value)
-      }
+    function handleTypeChange(e) {
+        setType(e.target.value);
+    }
 
-      const handleFileInput = async (e) => {
+    function handleDisplayTitleChange(e) {
+        setDisplayTitle(e.target.value);
+    }
+
+    function handleSubtitleChange(e) {
+        setSubtitle(e.target.value);
+    }
+
+    const handleFileInput = async (e) => {
         const file = e.target.files[0]
         setSelectedFile(file);
         const ext = file.name.toString().slice(-3);
         setFileExt(ext)
-        if(ext === "pdf"){
+        if (ext === "pdf") {
             setPdfProdImages(await generateProductPics(file));
-        }else if(ext === "zip"){
+        } else if (ext === "zip") {
             setIsZip(true)
         }
     }
@@ -262,102 +288,169 @@ export default function PdfUpload(){
         setSelectedCover(file);
         const coverUrl = await fetchPdfThumbnail(file);
         setCoverUrl(coverUrl);
-      };
+    };
 
-      const handleSplitImages = (leftImageData, rightImageData) => {
+    const handleSplitImages = (leftImageData, rightImageData) => {
         setFirstPageUrl(leftImageData);
         setLastPageUrl(rightImageData);
     };
 
-    function onChooseFile(){
+    function onChooseFile() {
         setSelectedFile(null)
     }
     const onChooseCover = () => {
         setSelectedCover(null);
     }
 
-      return (
+    function incrementStep(e) {
+        e.preventDefault()
+        setStep(step + 1)
+    }
+
+    function decrementStep(e) {
+        e.preventDefault()
+        if (step != 1) {
+            setStep(step - 1);
+        }
+    }
+
+    const handleAPlusClick = () => {
+        fileInputRef.current.click();
+    }
+
+    const handleFileChange = (event) => {
+        // Handle file change here
+        const files = event.target.files;
+        const newSelectedFiles = Array.from(files);
+        setAPlusPics((prevSelectedFiles) => [...prevSelectedFiles, ...newSelectedFiles]);
+    };
+
+    return (
         <div className="App">
-          <form className='upload-form' onSubmit={handleSubmit}>
-              <div className='upload-book'>
-                  <div>UPLOAD BOOK</div>
-                  <input type="file" onChange={handleFileInput} onClick={onChooseFile}/>
-                  <button type='submit' >Upload</button>
-              </div> 
-              <div className='upload-cover'>
-                  <div>UPLOAD COVER</div>
-                  <input type="file" onChange={handleCoverInput} onClick={onChooseCover}/>
-                  {coverUrl && (
-                      <ImageSlicer imageUrl={coverUrl} onSplit={handleSplitImages}/>
-                  )}
-              </div> 
-              <div className='book-details'>
-                  <textarea placeholder='Enter Book Description' onChange={handleDescriptionChange}/>
-                  <select id="select-category"  onChange={handleCategoryChange}>
-                      {categories.map((category) => (
-                          <option key={category.id} value={category.id}>
-                              {category.category_name}
-                          </option>
-                      ))}
-                  </select>
-                  <select id="select-brand"  onChange={handleBrandChange}>
-                      {brands.map((brand) => (
-                          <option key={brand.id} value={brand.id}>
-                              {brand.brand_name}
-                          </option>
-                      ))}
-                  </select>
-                  <div>
-                      <label>
-                          <input
-                              type="radio"
-                              value="Hard Cover"
-                              checked={type === "Hard Cover"}
-                              onChange={handleTypeChange}
-                          />
-                          Hard Cover
-                          </label>
-  
-                          <label>
-                          <input
-                              type="radio"
-                              value="Paperback"
-                              checked={type === "Paperback"}
-                              onChange={handleTypeChange}
-                          />
-                          Paperback
-                      </label>
-                      <label>
-                          <input
-                              type="radio"
-                              value="Digital"
-                              checked={type === "Digital"}
-                              onChange={handleTypeChange}
-                          />
-                          Digital
-                          </label>
-                          <label>
-                          <input
-                              type="radio"
-                              value="Printable"
-                              checked={type === "Printable"}
-                              onChange={handleTypeChange}
-                          />
-                          Printable
-                      </label>
-                  </div>
-                  <div>
-                      Title:
-                      <input onChange={handleTitleChange} placeholder='Enter title'/>
-                  </div>
-                  <div>
-                      <h3>PRODUCT IMAGES</h3>
-                      {pdfProdImages.map((image, index) => 
-                          <img key={index} src={image}/>
-                      )}
-                  </div>     
-              </div>
-          </form>
-        </div> 
-      );
+            <form className='upload-form' onSubmit={handleSubmit}>
+                {step === 1 && <div className='upload-cover'>
+                    <div>UPLOAD COVER</div>
+                    <input type="file" onChange={handleCoverInput} onClick={onChooseCover} />
+                    {coverUrl && (
+                        <ImageSlicer imageUrl={coverUrl} onSplit={handleSplitImages} />
+                    )}
+                    <div>
+                        <button onClick={incrementStep}>Next</button>
+                    </div>
+                </div>
+                }
+                {step === 2 && <div className='upload-book'>
+                    <div>UPLOAD BOOK</div>
+                    <input type="file" onChange={handleFileInput} onClick={onChooseFile} />
+                    <div>
+                        <button onClick={decrementStep}>Back</button>
+                        <button onClick={incrementStep}>Next</button>
+                    </div>
+                </div>
+                }
+                {step === 3 && <div>
+
+                    <div className="a-plus-image" >
+                        {aPlusPics && aPlusPics.map((image, index) => (
+                                <img
+                                    key={index}
+                                    src={URL.createObjectURL(image)}
+                                />
+                        ))}
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            style={{ display: 'none' }}
+                            onChange={handleFileChange}
+                        />
+
+                        {/* Custom upload button */}
+                        <button className="a-plus-btn" onClick={handleAPlusClick}>Schmuck</button>
+
+                    </div>
+                    <button onClick={decrementStep}>Back</button>
+                    <button onClick={incrementStep}>Next</button>
+                </div>}
+                {step === 4 && <div className='book-details'>
+                    <textarea placeholder='Enter Book Description' onChange={handleDescriptionChange} />
+                    <select id="select-category" onChange={handleCategoryChange}>
+                        {categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                                {category.category_name}
+                            </option>
+                        ))}
+                    </select>
+                    <select id="select-brand" onChange={handleBrandChange}>
+                        {brands.map((brand) => (
+                            <option key={brand.id} value={brand.id}>
+                                {brand.brand_name}
+                            </option>
+                        ))}
+                    </select>
+                    <div>
+                        <label>
+                            <input
+                                type="radio"
+                                value="Hard Cover"
+                                checked={type === "Hard Cover"}
+                                onChange={handleTypeChange}
+                            />
+                            Hard Cover
+                        </label>
+
+                        <label>
+                            <input
+                                type="radio"
+                                value="Paperback"
+                                checked={type === "Paperback"}
+                                onChange={handleTypeChange}
+                            />
+                            Paperback
+                        </label>
+                        <label>
+                            <input
+                                type="radio"
+                                value="Digital"
+                                checked={type === "Digital"}
+                                onChange={handleTypeChange}
+                            />
+                            Digital
+                        </label>
+                        <label>
+                            <input
+                                type="radio"
+                                value="Printable"
+                                checked={type === "Printable"}
+                                onChange={handleTypeChange}
+                            />
+                            Printable
+                        </label>
+                    </div>
+                    <div>
+                        Title:
+                        <input onChange={handleTitleChange} placeholder='Short Title For Database' />
+                    </div>
+                    <div>
+                        Display Title:
+                        <input onChange={handleDisplayTitleChange} placeholder='What Users Will See' />
+                    </div>
+                    <div>
+                        Subtitle:
+                        <input onChange={handleSubtitleChange} placeholder='Subtitle' />
+                    </div>
+                    <div>
+                        {prodImagesLoaded && <h3>PRODUCT IMAGES</h3>}
+                        {pdfProdImages.map((image, index) =>
+                            <img key={index} src={image} />
+                        )}
+                    </div>
+                    <div>
+                        <button onClick={decrementStep}>Back</button>
+                        <button type='submit' >Upload</button>
+                    </div>
+                </div>}
+
+            </form>
+        </div>
+    );
 }

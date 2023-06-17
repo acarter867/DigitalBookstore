@@ -5,3 +5,20 @@
 #front-cover-upload, #back-cover-upload{
     display: none;
 }
+.a-plus-image{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.a-plus-btn{
+
+}
+
+.a-plus-image img{
+    width: 25%;
+    min-width: 25%;
+    height: auto;
+    margin-right: 1vw;
+    margin-top: 1vw;
+}

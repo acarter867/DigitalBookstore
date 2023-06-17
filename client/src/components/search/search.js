@@ -14,7 +14,7 @@ export default function Search() {
 
   function handleSearchByChange(e) {
     setSearchBy(e.target.value);
-  } 
+  }
 
   async function searchBooks() {
     console.log(searchBy);
@@ -62,13 +62,13 @@ export default function Search() {
       <input type="text" value={query} onChange={handleQueryChange} />
       <button onClick={searchBooks}>Search</button>
       {bookItems.map((book) => (
-  <div key={book.id}>
-    <h1>{book.bookData.title}</h1>
-    <h2>{book.bookData.description}</h2>
-    <img src={book.frontThumbnail} alt="front thumbnail"/>
-    <img src={book.backThumbnail} alt="back thumbnail"/>
-  </div>
-))}
+        <div key={book.id}>
+          <h1>{book.bookData.title}</h1>
+          <h2>{book.bookData.description}</h2>
+          <img src={book.frontThumbnail} alt="front thumbnail" />
+          <img src={book.backThumbnail} alt="back thumbnail" />
+        </div>
+      ))}
     </div>
   );
 }
