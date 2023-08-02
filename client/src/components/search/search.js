@@ -14,7 +14,7 @@ export default function Search() {
 
   function handleSearchByChange(e) {
     setSearchBy(e.target.value);
-  } 
+  }
 
   async function searchBooks() {
     console.log(searchBy);
@@ -27,13 +27,10 @@ export default function Search() {
           const bookItems = [];
           for (const element of data) {
             const currId = element.id;
-            const frontThumbnailResponse = await fetch(`/api/search/thumbnail/${element.front_thumbnail}`);
-            const backThumbnailResponse = await fetch(`/api/search/thumbnail/${element.back_thumbnail}`);
-            console.log(frontThumbnailResponse)
             const bookDisplay = {
               bookData: element,
-              frontThumbnail: frontThumbnailResponse.url,
-              backThumbnail: backThumbnailResponse.url,
+              frontThumbnail: element.front_thumbnail,
+              backThumbnail: element.back_thumbnail,
             };
             bookItems.push(bookDisplay);
           }
@@ -65,13 +62,13 @@ export default function Search() {
       <input type="text" value={query} onChange={handleQueryChange} />
       <button onClick={searchBooks}>Search</button>
       {bookItems.map((book) => (
-  <div key={book.id}>
-    <h1>{book.bookData.title}</h1>
-    <h2>{book.bookData.description}</h2>
-    <img src={book.frontThumbnail} alt="front thumbnail"/>
-    <img src={book.backThumbnail} alt="back thumbnail"/>
-  </div>
-))}
+        <div key={book.id}>
+          <h1>{book.bookData.title}</h1>
+          <h2>{book.bookData.description}</h2>
+          <img src={book.frontThumbnail} alt="front thumbnail" />
+          <img src={book.backThumbnail} alt="back thumbnail" />
+        </div>
+      ))}
     </div>
   );
 }

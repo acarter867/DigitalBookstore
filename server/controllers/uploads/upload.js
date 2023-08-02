@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const {Brand, Category, Book, Prod_Images} = require('../../models')
+const { Brand, Category, Book, Prod_Images, APlus_Images } = require('../../models')
 const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
 require('dotenv').config()
@@ -9,13 +9,13 @@ const upload = multer({ storage: storage });
 
 
 
-cloudinary.config({ 
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
-  api_key: process.env.CLOUDINARY_API_KEY, 
-  api_secret: process.env.CLOUDINARY_API_SECRET 
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-//send new book PDF/ZIP TO S3
+//send new book PDF/ZIP TO Cloudinary
 router.post('/book/file', upload.single('file'), async (req, res) => {
   try {
     const fileBuffer = req.file.buffer;
@@ -75,10 +75,12 @@ router.post('/book/thumbnails', upload.array('thumbnails'), async (req, res) => 
 
 //send new book data to db
 router.post('/book/data', async (req, res) => {
-console.log("SENDING BOOK DATA")
+  console.log("SENDING BOOK DATA")
   try {
     const bookData = await Book.create({
       title: req.body.title,
+      display_title: req.body.display_title,
+      subtitle: req.body.subtitle,
       brand_id: req.body.brand_id,
       category_id: req.body.category_id,
       description: req.body.description,
@@ -88,21 +90,24 @@ console.log("SENDING BOOK DATA")
       back_thumbnail: req.body.back_thumbnail
     });
     res.status(200).json(bookData);
-  }catch (err) {
+  } catch (err) {
     res.status(500).json(err);
   }
 });
 
+//Send product image data to db
 router.post('/book/productimg/data', async (req, res) => {
   console.log("SENDING BOOK DATA ")
-  try{
+  try {
     const imageData = await Prod_Images.create({
       product_id: req.body.product_id,
       name: req.body.name,
-      alt_text: req.body.alt_text
+      alt_text: req.body.alt_text,
+      url: req.body.url
     });
     res.status(200).json(imageData)
-  }catch{
+  } catch (err) {
+    console.log(err)
     res.status(500).json({
       message: "EEEERRRRROOOOOORRRRR"
     });
@@ -111,91 +116,134 @@ router.post('/book/productimg/data', async (req, res) => {
 
 //send product images to Cloudinary
 
-router.post('/book/productimages', upload.array('productimages'), async (req, res) => {
+router.post('/book/productimage', upload.single('productimage'), async (req, res) => {
   try {
-    const pImages = req.files;
-    const promises = [];
-
-    pImages.forEach(productImage => {
-      const promise = new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream({
-          resource_type: 'image',
-          public_id: `Product-Pics/${productImage.originalname}`
-        }, (error, result) => {
-          if (error) {
-            console.error(error);
-            reject(error);
-          } else {
-            console.log(result);
-            resolve(result);
-          }
-        }).end(productImage.buffer);
-      });
-
-      promises.push(promise);
+    const productImage = req.file;
+    console.log(req.file)
+    const result = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream({
+        resource_type: 'image',
+        public_id: `Product-Pics/${productImage.originalname}`
+      }, (error, result) => {
+        if (error) {
+          console.error(error);
+          reject(error);
+        } else {
+          console.log(result);
+          resolve(result);
+        }
+      }).end(productImage.buffer);
     });
 
-    await Promise.all(promises);
+    const imageUrl = result.secure_url; // Extract the Cloudinary image URL from the result
 
-    res.status(200).json({ message: 'Files uploaded successfully' });
+    res.status(200).json({ message: 'File uploaded successfully', imageUrl });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to upload files to Cloudinary' });
+    console.error(error); // Log the error
+    res.status(500).json({ error: 'Failed to upload file to Cloudinary', detail: error.message });
   }
 });
 
-  //create new category
+//send product images to Cloudinary
+
+router.post('/book/aplusimage', upload.single('productimage'), async (req, res) => {
+  try {
+    console.log("SENDING A+ CONTENT TO CLOUDINARY")
+    const productImage = req.file;
+    console.log(req.file)
+    const result = await new Promise((resolve, reject) => {
+      cloudinary.uploader.upload_stream({
+        resource_type: 'image',
+        public_id: `A-Plus-Images/${productImage.originalname}`
+      }, (error, result) => {
+        if (error) {
+          console.error(error);
+          reject(error);
+        } else {
+          console.log(result);
+          resolve(result);
+        }
+      }).end(productImage.buffer);
+    });
+
+    const imageUrl = result.secure_url; // Extract the Cloudinary image URL from the result
+
+    res.status(200).json({ message: 'File uploaded successfully', imageUrl });
+  } catch (error) {
+    console.error(error); // Log the error
+    res.status(500).json({ error: 'Failed to upload file to Cloudinary', detail: error.message });
+  }
+});
+
+//Send A+ image data to db
+router.post('/book/aplusimage/data', async (req, res) => {
+  console.log("SENDING A+ CONTENT DATA");
+  try {
+    const imageData = await APlus_Images.create({
+      product_id: req.body.product_id,
+      alt_text: req.body.alt_text,
+      name: req.body.name,
+      url: req.body.url
+    });
+    res.status(200).json({ message: "A+ content upload success" });
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+//create new category
 router.post('/category', async (req, res) => {
-    try{
-        const category = await Category.create({
-            category_name: req.body.category_name
-        });
-        res.status(200).json(category)
-    }catch (err){
-        console.log(err);
-        res.status(500).json(err)
-    }
+  try {
+    const category = await Category.create({
+      category_name: req.body.category_name
+    });
+    res.status(200).json(category)
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err)
+  }
 })
 
 //get all categories
 router.get('/category', async (req, res) => {
-    console.log("ROUTE HIT")
-    try{
-        const allCategories = await Category.findAll({
-            order: [["id", "ASC"]],
-        });
-        const categories = allCategories.map((category) => category.get({ plain: true }))
-        res.send(categories)
-    }catch(err){
-        console.log(err)
-        res.status(500).json(err)
-    }    
+  console.log("ROUTE HIT")
+  try {
+    const allCategories = await Category.findAll({
+      order: [["id", "ASC"]],
+    });
+    const categories = allCategories.map((category) => category.get({ plain: true }))
+    res.send(categories)
+  } catch (err) {
+    console.log(err)
+    res.status(500).json(err)
+  }
 })
 
 //create new brand
 router.post('/brand', async (req, res) => {
-    try{
-        const brand = await Brand.create({
-            brand_name: req.body.brand_name
-        });
-        res.status(200).json(brand)
-    }catch(err){
-        console.log(err)
-        res.status(500).json(err)
-    }
+  try {
+    const brand = await Brand.create({
+      brand_name: req.body.brand_name
+    });
+    res.status(200).json(brand)
+  } catch (err) {
+    console.log(err)
+    res.status(500).json(err)
+  }
 })
 
 //get all brands
 router.get('/brand', async (req, res) => {
-    console.log("ROUTE HIT")
-    try{
-        const allBrands = await Brand.findAll({
-            order: [["id", "ASC"]],
-        });
-        const brands = allBrands.map((brand) => brand.get({ plain: true }))
-        res.send(brands)
-    }catch(err){
-        console.log(err)
-        res.status(500).json(err)
-    }    
+  console.log("ROUTE HIT")
+  try {
+    const allBrands = await Brand.findAll({
+      order: [["id", "ASC"]],
+    });
+    const brands = allBrands.map((brand) => brand.get({ plain: true }))
+    res.send(brands)
+  } catch (err) {
+    console.log(err)
+    res.status(500).json(err)
+  }
 })
 module.exports = router;

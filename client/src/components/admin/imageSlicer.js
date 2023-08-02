@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../../assets/css/imageSlicer.css';
 
-const ImageSlicer = ({ imageUrl }) => {
+const ImageSlicer = ({ imageUrl, onSplit }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [lineWidth, setLineWidth] = useState(200);
   const imageRef = useRef(null);
-  const canvasRef = useRef(null);
-  const [leftImage, setLeftImage] = useState(null);
-  const [rightImage, setRightImage] = useState(null)
+  const [leftImageSrc, setLeftImageSrc] = useState('');
+  const [rightImageSrc, setRightImageSrc] = useState('');
+  const [imageHasSplit, setImageHasSplit] = useState(false)
+  const [confirm, setConfirm] = useState(false)
 
   useEffect(() => {
     if (imageRef.current && imageRef.current.complete) {
@@ -16,86 +17,109 @@ const ImageSlicer = ({ imageUrl }) => {
   }, []);
 
   const handleSliderChange = (event) => {
-    setLineWidth(Number(event.target.value));
+    const sliderValue = Number(event.target.value);
+    const imageWidth = imageRef.current ? imageRef.current.width : 0;
+    const maxLineWidth = imageWidth / 2;
+    const newLineWidth = (sliderValue / 100) * maxLineWidth;
+    setLineWidth(newLineWidth);
   };
 
-  const splitImage = () => {
-    if (imageRef.current && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
+  const handleSplitImage = (e) => {
+    e.preventDefault();
+    setImageHasSplit(true)
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
 
-      // Set canvas dimensions
-      canvas.width = imageRef.current.offsetWidth;
-      canvas.height = imageRef.current.offsetHeight;
+    const image = imageRef.current;
+    canvas.width = image.width;
+    canvas.height = image.height;
 
-      // Clear the canvas
-      context.clearRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, 0, 0);
 
-      // Draw the original image on the canvas
-      context.drawImage(imageRef.current, 0, 0);
+    const leftImage = context.getImageData(
+      0,
+      0,
+      image.width / 2 - lineWidth / 2,
+      image.height
+    );
+    const rightImage = context.getImageData(
+      image.width / 2 + lineWidth / 2,
+      0,
+      image.width / 2 - lineWidth / 2,
+      image.height
+    );
 
-      // Clip the canvas based on the slider position
-      context.globalCompositeOperation = 'destination-out';
-      context.fillRect(lineWidth, 0, canvas.width - lineWidth, canvas.height);
+    canvas.width = image.width / 2 - lineWidth / 2;
+    context.putImageData(leftImage, 0, 0);
+    const leftImageDataURL = canvas.toDataURL('image/png');
+    setLeftImageSrc(leftImageDataURL);
 
-      // Get the left image as data URL
-      const leftImageUrl = canvas.toDataURL();
-
-      // Clear the canvas again
-      context.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw the original image on the canvas
-      context.drawImage(imageRef.current, 0, 0);
-
-      // Clip the canvas based on the slider position
-      context.globalCompositeOperation = 'destination-out';
-      context.fillRect(0, 0, lineWidth, canvas.height);
-
-      // Get the right image as data URL
-      const rightImageUrl = canvas.toDataURL();
-      setRightImage(rightImage)
-      setLeftImage(leftImageUrl)
-
-      // Use the leftImageUrl and rightImageUrl as needed (e.g., display or save them)
-      console.log('Left Image:', leftImageUrl);
-      console.log('Right Image:', rightImageUrl);
-    }
+    canvas.width = image.width / 2 - lineWidth / 2;
+    context.clearRect(0, 0, image.width / 2 - lineWidth / 2, image.height);
+    context.putImageData(rightImage, 0, 0);
+    const rightImageDataURL = canvas.toDataURL('image/png');
+    setRightImageSrc(rightImageDataURL);
+    onSplit(rightImageDataURL, leftImageDataURL);
   };
+
+  const confirmSplitImage = () => {
+    setConfirm(true)
+  }
 
   return (
     <div className="image-slicer">
-      <div className={`image-container ${imageLoaded ? 'loaded' : ''}`}>
-        <img
-          className="image"
-          src={imageUrl}
-          alt="Image"
-          ref={imageRef}
-          onLoad={() => setImageLoaded(true)}
-        />
-        {imageLoaded && (
-          <React.Fragment>
-            <div className="vertical-line" style={{ width: lineWidth }} />
-          </React.Fragment>
+      {!confirm && <div>
+        <div className={`image-container ${imageLoaded ? 'loaded' : ''}`}>
+          <img
+            className="image"
+            src={imageUrl}
+            alt="Image"
+            ref={imageRef}
+            onLoad={() => setImageLoaded(true)}
+          />
+          {imageLoaded && (
+            <div
+              className="vertical-line"
+              style={{
+                left: `calc(50% - ${lineWidth}px)`,
+                right: `calc(50% - ${lineWidth}px)`,
+              }}
+            />
+          )}
+        </div>
+        <div className="slider-container">
+          <input
+            type="range"
+            min="0"
+            max="10"
+            step="0.1"
+            value={imageRef.current ? (lineWidth / (imageRef.current.width / 2)) * 100 : 0}
+            onChange={handleSliderChange}
+            className="line-slider"
+          />
+          <button onClick={handleSplitImage}>Split Image</button>
+          {imageHasSplit &&
+            <div>
+              <button onClick={confirmSplitImage}>Looks Good!</button>
+            </div>
+          }
+        </div>
+      </div>}
+
+      <div className='sliced-images'>
+        {leftImageSrc && (
+          <div>
+            <h3>Left Image:</h3>
+            <img src={rightImageSrc} alt="Left" />
+          </div>
+        )}
+        {rightImageSrc && (
+          <div>
+            <h3>Right Image:</h3>
+            <img src={leftImageSrc} alt="Right" />
+          </div>
         )}
       </div>
-      <div className="slider-container">
-        <input
-          type="range"
-          min="5"
-          max="40"
-          value={lineWidth}
-          onChange={handleSliderChange}
-          className="line-slider"
-        />
-        <button onClick={splitImage}>Split Image</button>
-      </div>
-      <canvas ref={canvasRef} className="hidden-canvas" />
-      {leftImage && (
-        <img src={leftImage}/>
-      )}
-      {rightImage && (
-        <img src={rightImage}/>
-      )}
 
     </div>
   );

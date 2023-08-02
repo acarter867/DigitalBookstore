@@ -9,6 +9,7 @@ const Purchase = require("./Purchase");
 const Review = require("./Review");
 const User = require("./User");
 const Prod_Images = require('./Prod_Images');
+const APlus_Images = require('./APlus_Images');
 
 
 // Set relationships of tables
@@ -67,5 +68,9 @@ Cart.belongsTo(User, {
     foreignKey: "buyer_id"
 });
 
+APlus_Images.belongsTo(Book, {
+    foreignKey: "id"
+});
+
 module.exports = { Book, Brand, Cart, Category, Conversation, Download, 
-    Message, Purchase, Review, User, Prod_Images} 
+    Message, Purchase, Review, User, Prod_Images, APlus_Images} 

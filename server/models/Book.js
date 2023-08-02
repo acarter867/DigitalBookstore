@@ -15,6 +15,12 @@ Book.init(
             type: DataTypes.STRING,
             allowNull: false,
         },
+        display_title: {
+            type: DataTypes.STRING,
+        },
+        subtitle: {
+            type: DataTypes.STRING
+        },
         description: {
             type: DataTypes.STRING,
             allowNull: false
@@ -54,7 +60,7 @@ Book.init(
     },
     {
         sequelize,
-        timestamps: false,
+        timestamps: true,
         freezeTableName: true,
         underscored: true,
         modelName: "book",
