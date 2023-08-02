@@ -26,3 +26,16 @@
   left: 50%;
   transform: translateX(-50%);
 }
+
+.sliced-images{
+  position: absolute;
+  left: 50%;
+  margin-top: 3vw;
+  transform: translateX(-50%);
+  display: flex;
+  text-align: center;
+}
+
+.sliced-images img{
+  margin-left: 10px;
+}

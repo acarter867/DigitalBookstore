@@ -69,7 +69,7 @@ export default function PdfUpload() {
         console.log(twentyPercent)
         for (let i = 2; i <= twentyPercent; i++) {
             const currPage = await pdf.getPage(i);
-            const currViewport = currPage.getViewport({ scale: .5 });
+            const currViewport = currPage.getViewport({ scale: 1 });
             const currCanvas = document.createElement("canvas");
             const currContext = currCanvas.getContext("2d");
             currCanvas.height = currViewport.height;
@@ -89,7 +89,7 @@ export default function PdfUpload() {
         await new Promise((resolve) => (reader.onload = resolve));
         const pdf = await pdfjs.getDocument({ data: reader.result }).promise;
         const firstPage = await pdf.getPage(1);
-        const firstViewport = firstPage.getViewport({ scale: .5 });
+        const firstViewport = firstPage.getViewport({ scale: 1 });
         const firstCanvas = document.createElement("canvas");
         const firstContext = firstCanvas.getContext("2d");
         firstCanvas.height = firstViewport.height;
@@ -135,13 +135,25 @@ export default function PdfUpload() {
         return processedImages;
     }
 
+    const bundleAPlusImages = async() => {
+        const processedImages = [];
+        for(let i = 0; i < aPlusPics.length; i++){
+            const newImage = new File([generateBlobData(aPlusPics[i])], `Decorative-Image-${i}`, {type: 'image/png'});
+            processedImages.push(newImage);
+        }
+        return processedImages;
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         //bundle thumbnails and product pictures to array
         const thumbnails = bundleThumbnails();
         const processedProductImages = await bundleProductImages();
+        const processedAPlusPics = await bundleAPlusImages();
 
-        //Create form data for thumbnails
+        console.log(processedAPlusPics);
+
+        //Create form data for thumbnails 
         const thumbnailData = new FormData();
         thumbnails.forEach(thumbnail => {
             thumbnailData.append("thumbnails", thumbnail);
@@ -199,7 +211,6 @@ export default function PdfUpload() {
 
                         //Send product image data to cloudinary
                         for (const image of processedProductImages) {
-                            console.log(image)
                             try {
                                 const imageFormData = new FormData();
                                 imageFormData.append('productimage', image)
@@ -230,6 +241,37 @@ export default function PdfUpload() {
                             } catch (error) {
                                 // Handle the error if the image upload fails
                                 console.log(error)
+                            }
+                        }
+                        for(const image of processedAPlusPics){
+                            try{
+                                const imageFormData = new FormData();
+                                imageFormData.append("productimage", image);
+                                const imageUploadResponse = await fetch('/api/upload/book/aplusimage', {
+                                    method: "POST",
+                                    body: imageFormData
+                                });
+                                if(imageUploadResponse.ok){
+                                    const imageUploadResponseData = await imageUploadResponse.json();
+                                    const aPlusImageUrl = imageUploadResponseData.imageUrl;
+                                    const imageBody = {
+                                        product_id: book_id,
+                                        name: image.name,
+                                        alt_text: "Decorative Product Preview",
+                                        url: aPlusImageUrl
+                                    }
+                                    const aPlusImgData = await fetch('/api/upload//book/aplusimage/data',{
+                                        method: "POST",
+                                        body: imageBody,
+                                        headers: { "Content-Type": "application/json" },
+                                    });
+
+                                    if(aPlusImgData.ok){
+                                        console.log("A PLUS CONTENT UPLOAD SUCCESS")
+                                    }
+                                }
+                            }catch(err){
+                                console.log(err)
                             }
                         }
                     }
@@ -329,49 +371,60 @@ export default function PdfUpload() {
         <div className="App">
             <form className='upload-form' onSubmit={handleSubmit}>
                 {step === 1 && <div className='upload-cover'>
-                    <div>UPLOAD COVER</div>
+                    <div className="step-header">Step 1: Upload Cover</div>
                     <input type="file" onChange={handleCoverInput} onClick={onChooseCover} />
                     {coverUrl && (
                         <ImageSlicer imageUrl={coverUrl} onSplit={handleSplitImages} />
                     )}
-                    <div>
+                    <div className="options-container">
                         <button onClick={incrementStep}>Next</button>
                     </div>
                 </div>
                 }
                 {step === 2 && <div className='upload-book'>
-                    <div>UPLOAD BOOK</div>
+                    <div className="step-header">Step 2: Upload Book</div>
                     <input type="file" onChange={handleFileInput} onClick={onChooseFile} />
-                    <div>
+                    <div className="product-image-container">
+                        {prodImagesLoaded && <h3>PRODUCT IMAGES</h3>}
+                        {pdfProdImages.map((image, index) =>
+                            <img key={index} src={image} />
+                        )}
+                    </div>
+                    <div className="options-container">
                         <button onClick={decrementStep}>Back</button>
                         <button onClick={incrementStep}>Next</button>
                     </div>
                 </div>
                 }
                 {step === 3 && <div>
-
                     <div className="a-plus-image" >
-                        {aPlusPics && aPlusPics.map((image, index) => (
+                        <div className="step-header">Step 3: Upload A+ Content</div>
+                        <div>
+                            {aPlusPics && aPlusPics.map((image, index) => (
                                 <img
                                     key={index}
                                     src={URL.createObjectURL(image)}
                                 />
-                        ))}
+                            ))}
+                        </div>
                         <input
                             type="file"
                             ref={fileInputRef}
                             style={{ display: 'none' }}
                             onChange={handleFileChange}
                         />
-
                         {/* Custom upload button */}
                         <button className="a-plus-btn" onClick={handleAPlusClick}>Schmuck</button>
 
                     </div>
-                    <button onClick={decrementStep}>Back</button>
-                    <button onClick={incrementStep}>Next</button>
+                    <div className="options-container">
+                        <button onClick={decrementStep}>Back</button>
+                        <button onClick={incrementStep}>Next</button>
+                    </div>
+
                 </div>}
                 {step === 4 && <div className='book-details'>
+                    <div className="step-header">Step 4: Enter Product Info</div>
                     <textarea placeholder='Enter Book Description' onChange={handleDescriptionChange} />
                     <select id="select-category" onChange={handleCategoryChange}>
                         {categories.map((category) => (
@@ -438,13 +491,7 @@ export default function PdfUpload() {
                         Subtitle:
                         <input onChange={handleSubtitleChange} placeholder='Subtitle' />
                     </div>
-                    <div>
-                        {prodImagesLoaded && <h3>PRODUCT IMAGES</h3>}
-                        {pdfProdImages.map((image, index) =>
-                            <img key={index} src={image} />
-                        )}
-                    </div>
-                    <div>
+                    <div className="options-container">
                         <button onClick={decrementStep}>Back</button>
                         <button type='submit' >Upload</button>
                     </div>

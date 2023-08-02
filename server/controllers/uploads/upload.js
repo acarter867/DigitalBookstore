@@ -79,7 +79,7 @@ router.post('/book/data', async (req, res) => {
   try {
     const bookData = await Book.create({
       title: req.body.title,
-      display_title: req.body.short_title,
+      display_title: req.body.display_title,
       subtitle: req.body.subtitle,
       brand_id: req.body.brand_id,
       category_id: req.body.category_id,

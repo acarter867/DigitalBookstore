@@ -11,8 +11,8 @@ export default function Admin() {
     return(        
         <>        
         <PdfUpload/>
-        {/*<CreateCategory/>
-        <CreateBrand/>*/}
+        <CreateCategory/>
+        <CreateBrand/>
         </> 
     );
 

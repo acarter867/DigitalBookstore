@@ -17,11 +17,9 @@ Book.init(
         },
         display_title: {
             type: DataTypes.STRING,
-            allowNull: false
         },
         subtitle: {
-            type: DataTypes.STRING,
-            allowNull: false
+            type: DataTypes.STRING
         },
         description: {
             type: DataTypes.STRING,

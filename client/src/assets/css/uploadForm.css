@@ -22,3 +22,31 @@
     margin-right: 1vw;
     margin-top: 1vw;
 }
+
+.options-container{
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 1vw;
+}
+
+.product-image-container img{
+   width: 23%;
+   height: auto;
+   margin-left: 3px;
+}
+
+.product-image-container{
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.step-header{
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 20px;
+    font-size: 3vw;
+}
+
