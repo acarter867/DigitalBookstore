@@ -400,7 +400,7 @@ export default function PdfUpload() {
                     </div>
                 </div>
                 }
-                {step === 3 && <div>
+                {step === 3 && <div className="upload-a-content">
                     <div className="a-plus-image" >
                         <div className="step-header">Step 3: Upload A+ Content</div>
                         <div>
@@ -418,14 +418,15 @@ export default function PdfUpload() {
                             onChange={handleFileChange}
                         />
                         {/* Custom upload button */}
-                        <button className="a-plus-btn" onClick={handleAPlusClick}>Schmuck</button>
-
+                        <div className="a-plus-btn-container">
+                            <button className="a-plus-btn" onClick={handleAPlusClick}>Upload PDF</button>
+                        </div>
                     </div>
                     <div className="options-container">
                         <button onClick={decrementStep}>{`<`} Back</button>
                         <button onClick={incrementStep}>Next {`>`}</button>
                     </div>
-
+                
                 </div>}
                 {step === 4 && <div className='book-details'>
                     <div className="step-header">Step 4: Enter Product Info</div>

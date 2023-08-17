@@ -10,7 +10,7 @@ import "../../assets/css/admin.css"
 export default function Admin() {
 
     return(        
-        <div className='admin-main'>        
+        <div className='admin-main'>       
             <CreateCategory/>
             <CreateBrand/>
             <PdfUpload/>
