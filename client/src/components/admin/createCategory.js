@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import "../../assets/css/createCategory.css"
 
 export default function CreateCategory(){
     const [category, setCategory] = useState("");
@@ -22,14 +23,16 @@ export default function CreateCategory(){
     }
 
     return(
-        <div>
-            <div>
-                Create New Category
+        <div className='create-category-container'>
+            <div className='create-text-submit-wrapper'>
+                <div className='create-text'>
+                    Create New Category
+                </div>
+                <form className='create-category' onSubmit={handleSubmit}>
+                    <input className='category-input' type='text' placeholder='Enter Category' onChange={handleInputChange}/>
+                    <button className='submit' type='submit'>Submit</button>
+                </form>
             </div>
-            <form className='create-category' onSubmit={handleSubmit}>
-                <input type='text' placeholder='Enter Category' onChange={handleInputChange}/>
-                <button type='submit'>Submit</button>
-            </form>
         </div>
     )
 }

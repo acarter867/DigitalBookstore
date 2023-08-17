@@ -20,6 +20,10 @@ function Navbar() {
         <nav className="navbar">
           <ul>
             <li><a href='/'>Homepage</a></li>
+            <li><a href='/'>Random1</a></li>
+            <li><a href='/'>Random2</a></li>
+            <li><a href='/'>Random3</a></li>
+            <li><a href='/'>Random4</a></li>
             {isAdmin && <li><a href="/admin">Admin</a></li>}
           </ul>
         </nav>

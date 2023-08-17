@@ -23,30 +23,70 @@
     margin-top: 1vw;
 }
 
-.options-container{
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-top: 1vw;
-}
-
 .product-image-container img{
    width: 23%;
    height: auto;
    margin-left: 3px;
 }
 
-.product-image-container{
-    position: absolute;
+
+
+
+
+                                    /* PDF-upload-main is the START */
+
+.PDF-upload-main {
+    display: flex;
+    justify-content: center;
+    /* position: absolute;
     left: 50%;
-    transform: translateX(-50%);
+    top: 50%;
+    transform: translate(-50%, -60%); */
+}
+
+.upload-form {
+    display: flex;
+    justify-content: center;
+    margin: 22px;
+    border-radius: 10px;
+    background-color: rgb(204, 204, 204);
+}
+
+.upload-cover {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    height: 250px;
+    width: 300px;
+    border-radius: 10px;
+    background-color: rgb(204, 204, 204);
+}
+
+.upload-book {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    height: 250px;
+    width: 300px;
+    border-radius: 10px;
+    background-color: rgb(204, 204, 204);
 }
 
 .step-header{
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    top: 20px;
-    font-size: 3vw;
+    font-size: 25px; 
+    
 }
 
+
+
+.pdf-choose-file-btn {
+    margin-top: 30px;
+    width: 100%;
+    margin-right: -120px;
+}
+
+.options-container {
+    margin-top: 20px;
+}

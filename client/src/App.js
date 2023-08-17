@@ -7,8 +7,6 @@ import Signup from './components/signup-login/signupForm';
 import Login from './components/signup-login/loginForm';
 import HomePage from './components/landing-pages/homePage';
 import Search from './components/search/search';
-import { useEffect } from 'react';
-import { useState } from 'react';
 
 function App() {
 

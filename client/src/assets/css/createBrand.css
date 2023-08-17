@@ -1,0 +1,9 @@
+.create-brand-container {
+    display: flex;
+    justify-content: center;
+}
+
+.brand-input {
+    width: 220px;
+    margin-right: 10px;
+}

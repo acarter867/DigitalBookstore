@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import "../../assets/css/createBrand.css"
 
 export default function CreateBrand(){
     const [brand, setBrand] = useState("");
@@ -22,14 +23,16 @@ export default function CreateBrand(){
     }
 
     return(
-        <div>
-            <div>
-                Create New Brand
+        <div className='create-brand-container'>
+            <div className='create-text-submit-wrapper'>
+                <div className='create-text'>
+                    Create New Brand
+                </div>
+                <form className='create-category' onSubmit={handleSubmit}>
+                    <input className='brand-input' type='text' placeholder='Enter Brand' onChange={handleInputChange}/>
+                    <button className='submit' type='submit'>Submit</button>
+                </form>
             </div>
-            <form className='create-category' onSubmit={handleSubmit}>
-                <input type='text' placeholder='Enter Brand' onChange={handleInputChange}/>
-                <button type='submit'>Submit</button>
-            </form>
         </div>
     )
 }

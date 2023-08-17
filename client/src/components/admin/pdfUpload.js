@@ -368,22 +368,26 @@ export default function PdfUpload() {
     };
 
     return (
-        <div className="App">
+        <div className="PDF-upload-main">
             <form className='upload-form' onSubmit={handleSubmit}>
                 {step === 1 && <div className='upload-cover'>
                     <div className="step-header">Step 1: Upload Cover</div>
-                    <input type="file" onChange={handleCoverInput} onClick={onChooseCover} />
+                    <div className="choose-file-btn-container">
+                        <input className="pdf-choose-file-btn" type="file" onChange={handleCoverInput} onClick={onChooseCover} />
+                    </div>
                     {coverUrl && (
                         <ImageSlicer imageUrl={coverUrl} onSplit={handleSplitImages} />
                     )}
                     <div className="options-container">
-                        <button onClick={incrementStep}>Next</button>
+                        <button className="pdf-next-btn" onClick={incrementStep}>Next {`>`}</button>
                     </div>
                 </div>
                 }
                 {step === 2 && <div className='upload-book'>
                     <div className="step-header">Step 2: Upload Book</div>
-                    <input type="file" onChange={handleFileInput} onClick={onChooseFile} />
+                    <div className="choose-file-btn-container">
+                        <input className="pdf-choose-file-btn" type="file" onChange={handleFileInput} onClick={onChooseFile} />
+                    </div>
                     <div className="product-image-container">
                         {prodImagesLoaded && <h3>PRODUCT IMAGES</h3>}
                         {pdfProdImages.map((image, index) =>
@@ -391,8 +395,8 @@ export default function PdfUpload() {
                         )}
                     </div>
                     <div className="options-container">
-                        <button onClick={decrementStep}>Back</button>
-                        <button onClick={incrementStep}>Next</button>
+                        <button onClick={decrementStep}> {`<`} Back</button>
+                        <button onClick={incrementStep}>Next {`>`}</button>
                     </div>
                 </div>
                 }
@@ -418,8 +422,8 @@ export default function PdfUpload() {
 
                     </div>
                     <div className="options-container">
-                        <button onClick={decrementStep}>Back</button>
-                        <button onClick={incrementStep}>Next</button>
+                        <button onClick={decrementStep}>{`<`} Back</button>
+                        <button onClick={incrementStep}>Next {`>`}</button>
                     </div>
 
                 </div>}
@@ -492,7 +496,7 @@ export default function PdfUpload() {
                         <input onChange={handleSubtitleChange} placeholder='Subtitle' />
                     </div>
                     <div className="options-container">
-                        <button onClick={decrementStep}>Back</button>
+                        <button onClick={decrementStep}>{`<`} Back</button>
                         <button type='submit' >Upload</button>
                     </div>
                 </div>}
