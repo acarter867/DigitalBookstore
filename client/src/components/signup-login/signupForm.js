@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../../assets/css/signup.css'
+import {Link} from "react-router-dom"
 
 export default function Signup(){
     const [firstName, setFirstName] = useState("");
@@ -76,15 +77,18 @@ export default function Signup(){
 
 
     return(
-        <div>
+        <main className='signup-main'>
             <form className='sign-up-form' onSubmit={handleSubmit}>
+                <div className='login-q'>Already have an acccount? 
+                    <Link className='login-link' to={'/login'}> Login</Link>
+                </div>
                 <div className='form-input-field'>
                     <label className="input-label">First Name:</label>
                     <input className="form-input" type="text" id="first-name-sign-up" onChange={handleFirstNameChange} />
                 </div>
         
                 <div className='form-input-field'>
-                    <label >Last Name:</label>
+                    <label className='input-label'>Last Name:</label>
                     <input className="form-input" type="text" id="last-name-sign-up" onChange={handleLastNameChange} />
                 </div>
 
@@ -96,7 +100,7 @@ export default function Signup(){
                 <div className='form-input-field'>
                     <label className="input-label">Username:</label>
                     <input className="form-input" type="text" id="username-sign-up" onChange={handleUserNameChange}/>
-                    <button onClick={checkUsername}>Check username availability</button>
+                    {/* <button className='availability' onClick={checkUsername}>Check username availability</button> */}
                     <label id='username-availability'>{availability}</label>
                 </div>
 
@@ -110,8 +114,8 @@ export default function Signup(){
                     <input className="form-input" type="password" id="retype-password" onChange={handleRePassword}/>
                 </div>
                 
-                <button type='submit' id="submit-sign-up" className="btn">Sign up!</button>
+                <button type='submit' id="submit-sign-up" className="signup-btn">Sign up!</button>
             </form>
-        </div>
+        </main>
     )
 }

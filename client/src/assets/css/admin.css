@@ -1,6 +1,10 @@
 .admin-main {
     height: 100vh;
-    background-color: rgb(0, 116, 224);
+    background:
+    linear-gradient(red, transparent),
+    linear-gradient(to top left, lime, transparent),
+    linear-gradient(to top right, blue, transparent);
+    background-blend-mode: screen;
 }
 
 .admin-create-container {

@@ -1,8 +1,58 @@
-
-
 .available{
     color: rgb(50, 157, 50);
 }
 .unavailable{
     color: red;
+}
+
+.signup-main {
+    background:
+    linear-gradient(red, transparent),
+    linear-gradient(to top left, lime, transparent),
+    linear-gradient(to top right, blue, transparent);
+    background-blend-mode: screen;
+    height: 100vh;
+}
+
+.sign-up-form {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    padding: 25px;
+    border: 1px solid black;
+    border-radius: 10px;
+    gap: 7px;
+    width: 20vw;
+    background-color: rgb(255, 116, 116);
+}
+
+.login-q {
+    font-size: 9px;
+    margin-top: -20px;
+    margin-bottom: 10px;
+    text-align: right;
+}
+
+.form-input-field {
+    display: flex;
+    flex-direction: column;
+    align-items: center
+}
+
+.input-label {
+    text-align: left;
+    width: 100%;
+}
+
+.form-input {
+    border: 1px solid black;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.signup-btn {
+    width: 80px;
 }

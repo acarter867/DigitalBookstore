@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import "../../assets/css/homepage.css"
 
 
 export default function HomePage(){
@@ -49,28 +50,26 @@ export default function HomePage(){
       }
 
     return(
-        <>
-        <button onClick={() => downloadPdf('Hide&Seek-Hard Cover.pdf')}>Download PDF</button>
-        <Link to='/admin'>
-          <button>
-            ADMIN
-          </button>
-        </Link>
-        <Link to='/signup'>
-          <button>
-            Sign up!
-          </button>
-        </Link>
-    
-        <Link to={'/login'}>
-          <button>Login!</button>
-        </Link>
-    
-        <Link to={'/'}>
-          <button onClick={handleLogout}>logout!</button>
-        </Link>
+        <main className="homepage-main">
+          <button className="pdf-download-btn" onClick={() => downloadPdf('Hide&Seek-Hard Cover.pdf')}>Download PDF</button>
+          <Link to='/admin'>
+            <button>
+              ADMIN
+            </button>
+          </Link>
+          <Link to='/signup'>
+            <button>
+              Sign up!
+            </button>
+          </Link>
       
-        </>
-
+          <Link to={'/login'}>
+            <button>Login!</button>
+          </Link>
+      
+          <Link to={'/'}>
+            <button onClick={handleLogout}>logout!</button>
+          </Link>
+        </main>
     )
 }
