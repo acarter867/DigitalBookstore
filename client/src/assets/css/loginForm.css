@@ -1,0 +1,52 @@
+.login-main {
+    background:
+    linear-gradient(red, transparent),
+    linear-gradient(to top left, lime, transparent),
+    linear-gradient(to top right, blue, transparent);
+    background-blend-mode: screen;
+    height: 100vh;
+}
+
+.login-form-backplate {
+    position: absolute;
+    top: 42%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20vw;
+    height: 24vh;
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 25px;
+    background-color: rgb(255, 255, 255);
+    opacity: 34%;
+}
+
+.login-form {
+    position: absolute;
+    top: 42%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20vw;
+    height: 24vh;
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 25px;
+}
+
+.login-title {
+    text-align: center;
+    margin-bottom: 20px;
+    margin-top: -10px;
+}
+
+.login-inp {
+    width: 90%;
+}
+
+.login-credential {
+    margin-bottom: 20px;
+}
+
+.login-submit-btn {
+    margin-top: 20px;
+}

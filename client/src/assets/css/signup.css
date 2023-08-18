@@ -14,6 +14,20 @@
     height: 100vh;
 }
 
+.form-backplate {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid black;
+    border-radius: 10px;
+    width: 20vw;
+    height: 40vh;
+    padding: 25px;
+    background-color: rgb(255, 255, 255);
+    opacity: 34%;
+}
+
 .sign-up-form {
     position: absolute;
     top: 50%;
@@ -26,14 +40,48 @@
     border-radius: 10px;
     gap: 7px;
     width: 20vw;
-    background-color: rgb(255, 116, 116);
+    height: 40vh;
+}
+
+.signup-title {
+    margin-top: -10px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.login-q-backplate {
+    position: absolute;
+    left: 50%;
+    top: 20%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    text-align: center;
+    width: 20vw;
+    border: 1px solid black;
+    padding: 25px;
+    border-radius: 10px;
+    background-color: rgb(255, 255, 255);
+    opacity: 34%;
+    height: 2.5vh;
 }
 
 .login-q {
-    font-size: 9px;
-    margin-top: -20px;
-    margin-bottom: 10px;
-    text-align: right;
+    position: absolute;
+    left: 50%;
+    top: 20%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    text-align: center;
+    width: 20vw;
+    border: 1px solid black;
+    padding: 25px;
+    border-radius: 10px;
+    height: 2.5vh;
+    align-items: center;
+}
+
+.login-link {
+    text-decoration: none;
 }
 
 .form-input-field {
@@ -55,4 +103,5 @@
 
 .signup-btn {
     width: 80px;
+    margin-top: 20px;
 }

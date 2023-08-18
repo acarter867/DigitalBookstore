@@ -74,14 +74,18 @@ export default function Signup(){
             lblAvailability.classList.remove(data.message === "Available" ? "unavailable" : "available")
         })
     }
+    
 
 
     return(
         <main className='signup-main'>
+            <div className='login-q-backplate'></div>
+            <div className='login-q'>Already have an acccount? 
+                <Link className='login-link' to={'/login'}> Login</Link>
+            </div>
+            <div className='form-backplate'></div>
             <form className='sign-up-form' onSubmit={handleSubmit}>
-                <div className='login-q'>Already have an acccount? 
-                    <Link className='login-link' to={'/login'}> Login</Link>
-                </div>
+                <div className='signup-title'><b>Signup</b></div>
                 <div className='form-input-field'>
                     <label className="input-label">First Name:</label>
                     <input className="form-input" type="text" id="first-name-sign-up" onChange={handleFirstNameChange} />
